@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>letters.db - Canlı SQLite Veritabanı Görüntüleyici 🗄️</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0d0617;
+      --card-bg: #180c29;
+      --border: rgba(216, 180, 254, 0.2);
+      --purple: #8b5cf6;
+      --text: #f3e8ff;
+      --text-muted: #a78bfa;
+      --success: #10b981;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding: 30px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-pill {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--success);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--purple);
+      color: #fff;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 18px 20px;
+      border-radius: 12px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 4px;
+    }
+
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow-x: auto;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .table-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: rgba(46, 16, 77, 0.4);
+      padding: 14px 18px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(216, 180, 254, 0.08);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: rgba(139, 92, 246, 0.08);
+    }
+
+    .badge-read {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-unread {
+      background: rgba(236, 72, 153, 0.2);
+      color: #f472b6;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .code-font {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #c084fc;
+    }
+
+    .body-cell {
+      max-width: 320px;
+      color: #d8b4fe;
+      font-size: 0.85rem;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div>
+        <h1>🗄️ SQLite Canlı Veritabanı (letters.db)</h1>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+          Konum: <code>C:\Users\zovi\.gemini\antigravity\scratch\mor-mektup-web\letters.db</code>
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-pill">
+          <span class="pulse-dot"></span>
+          <span>Canlı Bağlı</span>
+        </div>
+        <button class="btn" onclick="fetchLiveData()">Yenile ↻</button>
+        <a href="index.html" class="btn" style="text-decoration: none; display: inline-block;">Siteye Git 💜</a>
+      </div>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Toplam Mektup Sayısı</div>
+        <div class="stat-value" id="totalCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Okunmamış Mektuplar</div>
+        <div class="stat-value" id="unreadCount" style="color: #f472b6;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Veritabanı Motoru</div>
+        <div class="stat-value" style="font-size: 1.3rem; color: #a78bfa; margin-top: 8px;">SQLite 3.49</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-header">
+        <span class="table-title">📄 letters Tablosu Kayıtları</span>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Her 3 saniyede bir otomatik yenilenir</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Gönderen</th>
+            <th>Alıcı</th>
+            <th>Başlık</th>
+            <th>Mektup İçeriği</th>
+            <th>Durum</th>
+            <th>Tarih</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+              Veritabanı taranıyor...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function fetchLiveData() {
+      const endpoints = ["/api/letters", "http://localhost:5500/api/letters"];
+      let data = null;
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            data = await res.json();
+            break;
+          }
+        } catch (e) {}
+      }
+
+      if (!data) {
+        // LocalStorage fallback
+        const local = localStorage.getItem("couple_letters_db_v1");
+        if (local) data = JSON.parse(local);
+      }
+
+      if (data && Array.isArray(data)) {
+        renderTable(data);
+      }
+    }
+
+    function renderTable(rows) {
+      document.getElementById("totalCount").textContent = rows.length;
+      const unreads = rows.filter(r => !r.isRead).length;
+      document.getElementById("unreadCount").textContent = unreads;
+
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Henüz hiç kayıt yok.</td></tr>`;
+        return;
+      }
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        const statusBadge = row.isRead 
+          ? `<span class="badge-read">Okundu</span>` 
+          : `<span class="badge-unread">Mühürlü (Okunmamış)</span>`;
+
+        // Strip HTML tags for clean preview
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = row.body;
+        const cleanBody = tempDiv.textContent || tempDiv.innerText || "";
+
+        tr.innerHTML = `
+          <td class="code-font">#${row.id}</td>
+          <td><strong>${row.from}</strong></td>
+          <td>${row.to}</td>
+          <td>${row.title}</td>
+          <td class="body-cell">${cleanBody.substring(0, 100)}${cleanBody.length > 100 ? '...' : ''}</td>
+          <td>${statusBadge}</td>
+          <td class="code-font" style="font-size: 0.8rem;">${row.date || ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    fetchLiveData();
+    setInterval(fetchLiveData, 3000); // 3 saniyede bir canlı yenile
+  </script>
+</body>
+</html>

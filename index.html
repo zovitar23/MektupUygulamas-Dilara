@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dilara & Çağrı - Mektup Sandığı 💜</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient canvas for soft purple glow particles -->
+  <canvas id="ambientCanvas"></canvas>
+
+  <!-- Top Navigation / User Bar -->
+  <header class="app-header">
+    <div class="user-pill" id="userPill" title="Profili Değiştir">
+      <span class="user-status-dot"></span>
+      <span class="user-name" id="currentUserName">Giriş Yapılmadı</span>
+      <span class="switch-icon">⇄</span>
+    </div>
+
+    <div class="header-actions">
+      <!-- Cloud Sync Status Button -->
+      <button class="header-btn" id="cloudSettingsBtn" title="Veritabanı / Bulut Bağlantısı">
+        <span class="cloud-icon" id="cloudIcon">☁️</span>
+        <span class="cloud-label" id="cloudStatusLabel">Bulut Senkron</span>
+      </button>
+
+      <!-- Audio Button -->
+      <button class="header-btn" id="audioToggleBtn" title="Melodiyi Aç / Kapat">
+        <span class="audio-icon">♪</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <main class="main-wrap">
+
+    <!-- 1. PROFILE SELECTION SCREEN (If not selected) -->
+    <section class="profile-screen" id="profileScreen">
+      <span class="sub-tag">Bizim Alanımız</span>
+      <h1 class="couple-title">Dilara & Çağrı</h1>
+      <p class="couple-desc">Mektup sandığına hoş geldiniz. Devam etmek için profilini seç 💜</p>
+
+      <div class="profile-cards">
+        <button class="profile-btn" onclick="selectUser('Çağrı')">
+          <div class="avatar-ring">Ç</div>
+          <span class="name">Çağrı</span>
+          <span class="role">Giriş Yap</span>
+        </button>
+
+        <button class="profile-btn" onclick="selectUser('Dilara')">
+          <div class="avatar-ring">D</div>
+          <span class="name">Dilara</span>
+          <span class="role">Giriş Yap</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. MAIN DASHBOARD (When logged in) -->
+    <section class="dashboard-screen hidden" id="dashboardScreen">
+      
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs">
+        <button class="tab-btn active" id="tabInbox" onclick="switchTab('inbox')">
+          <span>Gelen Mektuplar</span>
+          <span class="unread-badge hidden" id="unreadBadge">0</span>
+        </button>
+        <button class="tab-btn" id="tabWrite" onclick="switchTab('write')">
+          <span>Yeni Mektup Yaz ✍️</span>
+        </button>
+        <button class="tab-btn" id="tabArchive" onclick="switchTab('archive')">
+          <span>Mektup Sandığı (Arşiv)</span>
+        </button>
+      </nav>
+
+      <!-- TAB 1: INBOX & SEALED ENVELOPE VIEW -->
+      <div class="tab-content" id="contentInbox">
+        
+        <!-- If there's an unread or active letter -->
+        <div class="inbox-container" id="inboxContainer">
+          
+          <!-- Envelope Stage (For Unopened Letter) -->
+          <div class="envelope-view" id="inboxEnvelopeView">
+            <div class="envelope-header">
+              <span class="env-subtitle" id="envSenderSubtitle">Sana Özel Bir Mektup</span>
+              <h2 class="env-title" id="envMainTitle">Yeni Bir Mektubun Var</h2>
+              <p class="env-instruction">Mührün üzerine dokunarak mektubunu açabilirsin</p>
+            </div>
+
+            <!-- 3D Envelope -->
+            <div class="envelope-box" id="inboxEnvelopeTrigger">
+              <div class="env-back"></div>
+              <div class="env-letter-peek"></div>
+              <div class="env-pocket-left"></div>
+              <div class="env-pocket-right"></div>
+              <div class="env-pocket-bottom"></div>
+              <div class="env-flap-top" id="inboxEnvFlap"></div>
+              
+              <!-- Purple Wax Seal -->
+              <div class="wax-seal" id="inboxWaxSeal">
+                <div class="seal-ring">
+                  <span class="seal-symbol">♥</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Open Letter Sheet View (Revealed after breaking wax) -->
+          <div class="open-letter-view hidden" id="inboxLetterView">
+            <article class="letter-sheet">
+              <header class="letter-meta">
+                <span class="letter-sender-tag" id="letterSenderTag">Çağrı'dan</span>
+                <time class="letter-date" id="letterDateTag">4 Nisan 2026</time>
+              </header>
+
+              <h2 class="letter-title-display" id="letterTitleDisplay">Sana Bir Mektup...</h2>
+
+              <div class="letter-content-display" id="letterContentDisplay">
+                <!-- Dynamically injected -->
+              </div>
+
+              <footer class="letter-closing">
+                <span class="closing-phrase">Daima seninle,</span>
+                <div class="closing-author" id="letterAuthorDisplay">Çağrı</div>
+              </footer>
+            </article>
+
+            <div class="letter-actions-bottom">
+              <button class="btn-reply" onclick="startReply()">
+                <span>Bu Mektuba Cevap Yaz ✍️</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty Inbox Message (When all letters are read) -->
+          <div class="empty-state hidden" id="inboxEmptyState">
+            <div class="empty-icon">✉️</div>
+            <h3>Şu Anda Yeni Mektup Yok</h3>
+            <p id="emptyInboxText">Dilara henüz yeni bir mektup göndermedi. Ona güzel bir sürpriz mektup yazmak ister misin?</p>
+            <button class="btn-primary" onclick="switchTab('write')">Mektup Yaz ✍️</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB 2: WRITE A NEW LETTER -->
+      <div class="tab-content hidden" id="contentWrite">
+        <div class="write-container">
+          <div class="write-header">
+            <span class="write-tag">Kime: <strong id="writeRecipientName">Dilara</strong></span>
+            <h2>Sevgiline Mektup Yaz</h2>
+            <p>Hissettiğin her şeyi parşömene dök, mühürle ve ona gönder 💜</p>
+          </div>
+
+          <form id="letterForm" onsubmit="handleSendLetter(event)">
+            <div class="form-sheet">
+              <div class="form-meta">
+                <span class="meta-city">İstanbul</span>
+                <span class="meta-date" id="composeCurrentDate">4 Nisan 2026</span>
+              </div>
+
+              <div class="input-group">
+                <label for="composeTitle">Mektup Başlığı:</label>
+                <input type="text" id="composeTitle" placeholder="Örn: Kalbimin En Güzel Köşesine, İyi ki Varsın..." required>
+              </div>
+
+              <div class="input-group">
+                <label for="composeSalutation">Hitap:</label>
+                <input type="text" id="composeSalutation" value="Sevgilim," required>
+              </div>
+
+              <div class="input-group">
+                <label for="composeBody">Mektubun:</label>
+                <textarea id="composeBody" rows="8" placeholder="Buraya sevgiline söylemek istediğin tüm güzel duyguları yazabilirsin..." required></textarea>
+              </div>
+
+              <div class="input-group align-right">
+                <label for="composeSignature">İmzan:</label>
+                <input type="text" id="composeSignature" value="Çağrı" class="signature-input" required>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-seal-send" id="btnSealSend">
+                <span class="btn-seal-icon">♥</span>
+                <span>Mektubu Mühürle & Gönder</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB 3: ARCHIVE (MEKTUP SANDIĞI) -->
+      <div class="tab-content hidden" id="contentArchive">
+        <div class="archive-container">
+          <div class="archive-header">
+            <h2>Mektup Sandığımız</h2>
+            <p>Birbirinize yazdığınız tüm aşk mektupları bu sandıkta saklanır.</p>
+          </div>
+
+          <div class="archive-list" id="archiveList">
+            <!-- Dynamically populated letters -->
+          </div>
+        </div>
+      </div>
+
+      <!-- MINIMAL LOVE COUNTER -->
+      <section class="minimal-counter">
+        <p class="counter-heading">4 Nisan 2026'dan bu yana seninle geçen her an</p>
+        <div class="counter-digits">
+          <div class="digit-unit">
+            <span class="digit-val" id="cntDays">0</span>
+            <span class="digit-tag">gün</span>
+          </div>
+          <span class="digit-sep">·</span>
+          <div class="digit-unit">
+            <span class="digit-val" id="cntHours">0</span>
+            <span class="digit-tag">saat</span>
+          </div>
+          <span class="digit-sep">·</span>
+          <div class="digit-unit">
+            <span class="digit-val" id="cntMinutes">0</span>
+            <span class="digit-tag">dakika</span>
+          </div>
+          <span class="digit-sep">·</span>
+          <div class="digit-unit">
+            <span class="digit-val" id="cntSeconds">0</span>
+            <span class="digit-tag">saniye</span>
+          </div>
+        </div>
+      </section>
+
+    </section>
+
+  </main>
+
+  <!-- CLOUD DATABASE CONFIGURATION MODAL (Supabase SQL & Cloud) -->
+  <div class="modal-overlay" id="cloudModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>🗄️ SQL / Bulut Veritabanı Bağlantısı</h3>
+        <button class="modal-close" onclick="closeCloudModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-info">
+          Mektuplarınızı buluttaki ücretsiz bir <strong>PostgreSQL (SQL)</strong> veritabanında (Supabase) saklayabilir, telefonunuzdan ve bilgisayarınızdan canlı olarak erişebilirsiniz.
+        </p>
+
+        <div class="db-status-badge" id="dbStatusBadge">
+          <span class="status-indicator"></span>
+          <span id="dbStatusText">Yerel Bellek / Bulut Aktif</span>
+        </div>
+
+        <div class="sync-setup-box">
+          <label>Supabase Proje URL (İsteğe Bağlı):</label>
+          <input type="text" id="inputSupabaseUrl" placeholder="https://xyzcompany.supabase.co">
+        </div>
+
+        <div class="sync-setup-box">
+          <label>Supabase Anon / API Key (İsteğe Bağlı):</label>
+          <input type="password" id="inputSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
+        </div>
+
+        <div class="sync-setup-box">
+          <label>Ortak Çift Kodu (Özel Anahtar):</label>
+          <input type="text" id="inputCoupleKey" placeholder="Örn: dilara-cagri-0404" value="dilara-cagri-0404">
+          <small>İkiniz de aynı anahtarı girdiğinizde mektuplarınız anında eşitlenir.</small>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <a href="admin.html" target="_blank" style="color: #c084fc; font-size: 0.85rem; text-decoration: underline; font-weight: 500;">
+            🗄️ letters.db'yi Canlı İzle
+          </a>
+          <button class="btn-save-cloud" onclick="saveCloudSettings()">SQL / Bulutu Kaydet & Bağlan ✨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase PostgreSQL Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+</body>
+</html>

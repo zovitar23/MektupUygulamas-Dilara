@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# SQLite (sadece yerelde çalışsın, GitHub'a gitmesin)
+letters.db
+*.db
+
+# Windows
+baslat.bat
+sessiz_baslat.vbs
+
+# Ortam değişkenleri
+.env
