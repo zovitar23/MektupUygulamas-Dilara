@@ -32,7 +32,7 @@ let currentOpenLetter = null;
 let coupleKey = localStorage.getItem("couple_sync_key") || "dilara-cagri-0404";
 
 // ── Supabase Bağlantısı (REST API — SDK gerektirmez) ──────────────────
-const SUPABASE_URL = "https://ghzzzinpxbvxegnxxfvi.supabase.co";
+const SUPABASE_URL = "https://ghzzzinpxbvxegnxkfvl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_UgaF4znQ1PdYuc9VQzn_Xg_HVy63RSf";
 const SB_HEADERS = {
   "Content-Type": "application/json",
