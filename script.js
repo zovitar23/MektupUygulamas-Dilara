@@ -48,12 +48,49 @@ async function sbFetch(path, options = {}) {
   });
 }
 
+function showToast(title, message, onClick) {
+  let container = document.getElementById("toastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `
+    <div class="toast-icon">💌</div>
+    <div class="toast-content">
+      <h4>${title}</h4>
+      <p>${message}</p>
+    </div>
+  `;
+
+  if (onClick) {
+    toast.addEventListener("click", () => {
+      onClick();
+      toast.classList.add("toast-out");
+      setTimeout(() => toast.remove(), 400);
+    });
+  }
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    if (document.body.contains(toast)) {
+      toast.classList.add("toast-out");
+      setTimeout(() => toast.remove(), 400);
+    }
+  }, 6000);
+}
+
 async function fetchFromSupabase() {
   try {
-    const res = await sbFetch("/letters?order=created_at.desc");
+    const res = await sbFetch("/letters?order=id.desc");
     if (!res.ok) return;
     const data = await res.json();
-    letters = data.map(row => ({
+    
+    const parsedLetters = data.map(row => ({
       id: row.id,
       from: row.sender,
       to: row.recipient,
@@ -65,6 +102,23 @@ async function fetchFromSupabase() {
       isRead: row.is_read,
       createdAt: new Date(row.created_at).getTime()
     }));
+
+    if (letters.length > 0 && currentUser) {
+      const topOldId = letters[0]?.id || 0;
+      const topNewId = parsedLetters[0]?.id || 0;
+      
+      if (topNewId > topOldId) {
+        const newMail = parsedLetters.find(l => l.id > topOldId && l.to === currentUser);
+        if (newMail) {
+          showToast("Yeni Mektup Geldi! 💜", `${newMail.from} sana yeni bir mektup mühürledi.`, () => {
+            switchTab("inbox");
+          });
+          playSubtleChime();
+        }
+      }
+    }
+
+    letters = parsedLetters;
     localStorage.setItem("couple_letters_db_v1", JSON.stringify(letters));
     updateUI();
     const label = document.getElementById("cloudStatusLabel");
