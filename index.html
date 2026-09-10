@@ -250,35 +250,19 @@
       </div>
       <div class="modal-body">
         <p class="modal-info">
-          Mektuplarınızı buluttaki ücretsiz bir <strong>PostgreSQL (SQL)</strong> veritabanında (Supabase) saklayabilir, telefonunuzdan ve bilgisayarınızdan canlı olarak erişebilirsiniz.
+          Mektuplarınız şu anda buluttaki <strong>PostgreSQL (Supabase)</strong> veritabanına otomatik olarak eşitleniyor. Hiçbir ayar yapmanıza gerek yok! ✨
         </p>
 
         <div class="db-status-badge" id="dbStatusBadge">
           <span class="status-indicator"></span>
-          <span id="dbStatusText">Yerel Bellek / Bulut Aktif</span>
+          <span id="dbStatusText">Supabase SQL Aktif 🚀</span>
         </div>
 
-        <div class="sync-setup-box">
-          <label>Supabase Proje URL (İsteğe Bağlı):</label>
-          <input type="text" id="inputSupabaseUrl" placeholder="https://xyzcompany.supabase.co">
-        </div>
-
-        <div class="sync-setup-box">
-          <label>Supabase Anon / API Key (İsteğe Bağlı):</label>
-          <input type="password" id="inputSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
-        </div>
-
-        <div class="sync-setup-box">
-          <label>Ortak Çift Kodu (Özel Anahtar):</label>
-          <input type="text" id="inputCoupleKey" placeholder="Örn: dilara-cagri-0404" value="dilara-cagri-0404">
-          <small>İkiniz de aynı anahtarı girdiğinizde mektuplarınız anında eşitlenir.</small>
-        </div>
-
-        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
           <a href="admin.html" target="_blank" style="color: #c084fc; font-size: 0.85rem; text-decoration: underline; font-weight: 500;">
             🗄️ letters.db'yi Canlı İzle
           </a>
-          <button class="btn-save-cloud" onclick="saveCloudSettings()">SQL / Bulutu Kaydet & Bağlan ✨</button>
+          <button class="btn-save-cloud" onclick="closeCloudModal()">Tamam 💜</button>
         </div>
       </div>
     </div>
